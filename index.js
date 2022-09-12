@@ -20,79 +20,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import console from "console";
-import * as fs from "fs/promises";
-import * as path from "path";
-import * as os from "os";
-import { argv, argv0, exit } from "process";
-import { spawnSync } from "child_process";
+import { visit, CONTINUE } from "unist-util-visit";
+import { format } from "prettier";
+import { prettierPluginLatexMath } from "./prettier-plugin-latex-math.js";
 
-import minimist from "minimist";
-import rehypeFormat from "rehype-format";
-import rehypeMathJax from "rehype-mathjax";
-import rehypeStringify from "rehype-stringify";
-import remarkMath from "remark-math";
-import remarkParse from "remark-parse";
-import remarkRehype from "remark-rehype";
-import { unified } from "unified";
-
-import formatMath from "./lib/format-math.js";
-
-const helpText = `Usage: ${argv0} [FILE]`
-
-let inputFile, inputString;
-
-const opts = minimist(argv.slice(2), {
-    alias: {
-        h: "help",
-    },
-    boolean: ["help"],
-});
-
-if (opts.help) {
-    console.log(helpText);
-    exit(0);
+function visitor(node) {
+    node.value = format(node.value, {
+        plugins: [prettierPluginLatexMath],
+        parser: "latex-parser",
+    });
+    return CONTINUE;
 }
 
-if (opts._.length == 0) {
-    console.error(`${argv0}: error: no input files`);
-    exit(2);
-}
-
-try {
-    inputFile = await fs.open(opts._[0]);
-    inputString = await inputFile.readFile("utf-8");
-} catch (e) {
-    console.error(`${argv0}: fatal error: cannot open input file`);
-    exit(2);
-} finally {
-    await inputFile.close();
-}
-
-const baseProcessor = unified().use(remarkParse).use(remarkMath);
-
-const expected = await baseProcessor()
-    .use(remarkRehype)
-    .use(rehypeMathJax)
-    .use(rehypeFormat) // we are outputting diffs so a formatter is great help
-    .use(rehypeStringify)
-    .process(inputString);
-
-const formatted = await baseProcessor()
-    .use(formatMath)
-    .use(remarkRehype)
-    .use(rehypeMathJax)
-    .use(rehypeFormat)
-    .use(rehypeStringify)
-    .process(inputString);
-
-if (expected.value == formatted.value) {
-    exit(0); // no output for no discrepancies
-} else {
-    console.log("MathJax output differs");
-    console.log("Expected:");
-    console.log(expected.value);
-    console.log("Formatted:");
-    console.log(formatted.value);
-    exit(1);
+export default function formatMath() {
+    return function transformer(tree) {
+        visit(tree, ["math", "inlineMath"], visitor);
+    };
 }
