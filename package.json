@@ -10,6 +10,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@unified-latex/unified-latex-prettier": "^1.0.12",
     "@unified-latex/unified-latex-util-parse": "^1.0.12",
     "mathjax-full": "^3.2.2",
     "minimist": "^1.2.6",

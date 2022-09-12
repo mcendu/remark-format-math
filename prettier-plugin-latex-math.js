@@ -1,5 +1,6 @@
-import { parseMath } from "@unified-latex/unified-latex-util-parse";
-import { printLatexAst } from "./printer";
+import { unified } from "unified";
+import { unifiedLatexFromString } from "@unified-latex/unified-latex-util-parse";
+import { printLatexAst } from "@unified-latex/unified-latex-prettier";
 
 const languages = [
     {
@@ -11,7 +12,9 @@ const languages = [
 
 const parsers = {
     "latex-parser": {
-        parseMath,
+        parser: unified()
+            .use(unifiedLatexFromString, { mode: "math" })
+            .freeze(),
         astFormat: "latex-ast",
         locStart: (node) => (node.position ? node.position.start.offset : 0),
         locEnd: (node) => (node.position ? node.position.end.offset : 1),
