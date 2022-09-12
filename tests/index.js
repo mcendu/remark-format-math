@@ -20,12 +20,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import console from "console";
 import * as fs from "fs/promises";
-import { argv, argv0, exit } from "process";
 
 import test from "ava";
-import minimist from "minimist";
 import rehypeFormat from "rehype-format";
 import rehypeMathJax from "rehype-mathjax";
 import rehypeStringify from "rehype-stringify";
@@ -35,7 +32,6 @@ import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 
 import formatMath from "../index.js";
-import exp from "constants";
 
 async function TestInputFile(filename) {
     test(`tests/${filename}`, async (assert) => {
@@ -61,3 +57,5 @@ async function TestInputFile(filename) {
         assert.is(formatted.value, expected.value);
     });
 }
+
+TestInputFile("basic_inline.md");
