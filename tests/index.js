@@ -24,6 +24,7 @@ import console from "console";
 import * as fs from "fs/promises";
 import { argv, argv0, exit } from "process";
 
+import test from "ava";
 import minimist from "minimist";
 import rehypeFormat from "rehype-format";
 import rehypeMathJax from "rehype-mathjax";
@@ -34,62 +35,29 @@ import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 
 import formatMath from "../index.js";
+import exp from "constants";
 
-const helpText = `Usage: ${argv0} [FILE]`
+async function TestInputFile(filename) {
+    test(`tests/${filename}`, async (assert) => {
+        const input = await fs.readFile(`tests/${filename}`);
 
-let inputFile, inputString;
+        const baseProcessor = unified().use(remarkParse).use(remarkMath);
 
-const opts = minimist(argv.slice(2), {
-    alias: {
-        h: "help",
-    },
-    boolean: ["help"],
-});
+        const expected = await baseProcessor()
+            .use(remarkRehype)
+            .use(rehypeMathJax)
+            .use(rehypeFormat) // we are outputting diffs
+            .use(rehypeStringify)
+            .process(input);
 
-if (opts.help) {
-    console.log(helpText);
-    exit(0);
-}
+        const formatted = await baseProcessor()
+            .use(formatMath)
+            .use(remarkRehype)
+            .use(rehypeMathJax)
+            .use(rehypeFormat)
+            .use(rehypeStringify)
+            .process(input);
 
-if (opts._.length == 0) {
-    console.error(`${argv0}: error: no input files`);
-    exit(2);
-}
-
-try {
-    inputFile = await fs.open(opts._[0]);
-    inputString = await inputFile.readFile("utf-8");
-} catch (e) {
-    console.error(`${argv0}: fatal error: cannot open input file`);
-    exit(2);
-} finally {
-    await inputFile.close();
-}
-
-const baseProcessor = unified().use(remarkParse).use(remarkMath);
-
-const expected = await baseProcessor()
-    .use(remarkRehype)
-    .use(rehypeMathJax)
-    .use(rehypeFormat) // we are outputting diffs so a formatter is great help
-    .use(rehypeStringify)
-    .process(inputString);
-
-const formatted = await baseProcessor()
-    .use(formatMath)
-    .use(remarkRehype)
-    .use(rehypeMathJax)
-    .use(rehypeFormat)
-    .use(rehypeStringify)
-    .process(inputString);
-
-if (expected.value == formatted.value) {
-    exit(0); // no output for no discrepancies
-} else {
-    console.log("MathJax output differs");
-    console.log("Expected:");
-    console.log(expected.value);
-    console.log("Formatted:");
-    console.log(formatted.value);
-    exit(1);
+        assert.is(formatted.value, expected.value);
+    });
 }

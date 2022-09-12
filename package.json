@@ -25,5 +25,8 @@
     "unified": "^10.1.2",
     "unist-util-filter": "^4.0.0",
     "unist-util-visit": "^4.1.0"
+  },
+  "devDependencies": {
+    "ava": "^4.3.3"
   }
 }
