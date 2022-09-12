@@ -33,7 +33,7 @@ const languages = [
 
 const parsers = {
     "unified-latex-math": {
-        parser: unified().use(unifiedLatexFromString, { mode: "math" }).freeze()
+        parse: unified().use(unifiedLatexFromString, { mode: "math" }).freeze()
             .parse,
         astFormat: "latex-ast",
         locStart: (node) => (node.position ? node.position.start.offset : 0),
