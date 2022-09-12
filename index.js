@@ -27,7 +27,7 @@ import { prettierPluginLatexMath } from "./prettier-plugin-latex-math.js";
 function visitor(node) {
     node.value = format(node.value, {
         plugins: [prettierPluginLatexMath],
-        parser: "latex-parser",
+        parser: "unified-latex-math",
     });
     return CONTINUE;
 }

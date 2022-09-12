@@ -4,17 +4,15 @@ import { printLatexAst } from "@unified-latex/unified-latex-prettier";
 
 const languages = [
     {
-        name: "latex",
-        extensions: [".tex"],
-        parsers: ["latex-parser"],
+        name: "latex-math",
+        parsers: ["unified-latex-math"],
     },
 ];
 
 const parsers = {
-    "latex-parser": {
-        parser: unified()
-            .use(unifiedLatexFromString, { mode: "math" })
-            .freeze(),
+    "unified-latex-math": {
+        parser: unified().use(unifiedLatexFromString, { mode: "math" }).freeze()
+            .parse,
         astFormat: "latex-ast",
         locStart: (node) => (node.position ? node.position.start.offset : 0),
         locEnd: (node) => (node.position ? node.position.end.offset : 1),
