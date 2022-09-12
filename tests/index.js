@@ -34,7 +34,7 @@ import { unified } from "unified";
 import formatMath from "../index.js";
 
 async function TestInputFile(filename) {
-    test(`tests/${filename}`, async (assert) => {
+    test(`${filename}`, async (assert) => {
         const input = await fs.readFile(`tests/${filename}`);
 
         const baseProcessor = unified().use(remarkParse).use(remarkMath);
@@ -59,3 +59,4 @@ async function TestInputFile(filename) {
 }
 
 TestInputFile("basic_inline.md");
+TestInputFile("basic_display.md");
