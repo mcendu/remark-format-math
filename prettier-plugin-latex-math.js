@@ -31,10 +31,13 @@ const languages = [
     },
 ];
 
+const parse = unified()
+    .use(unifiedLatexFromString, { mode: "math" })
+    .freeze().parse;
+
 const parsers = {
     "unified-latex-math": {
-        parse: unified().use(unifiedLatexFromString, { mode: "math" }).freeze()
-            .parse,
+        parse,
         astFormat: "latex-ast",
         locStart: (node) => (node.position ? node.position.start.offset : 0),
         locEnd: (node) => (node.position ? node.position.end.offset : 1),
